@@ -6,6 +6,7 @@ import styles from "../../styles/styles";
 import { Link , useNavigate }  from "react-router-dom";
 import { server } from "../../server";
 import axios from 'axios';
+import { toast } from "react-toastify";
 
 
 const Signup = () => {
@@ -35,10 +36,16 @@ const Signup = () => {
     axios
       .post(`${server}/user/create-user`, newForm, config)
       .then((res) => {
-        alert((res.message));
+        toast.success(res.data.message)
+        setName('');
+        setEmail('');
+        setPassword('');
+        setAvatar();
       })
-      .catch((err) => {
-        console.log(err);
+      .catch((error) => {
+        
+        toast.error(error.response.data.message);
+        
       });
   };
 
