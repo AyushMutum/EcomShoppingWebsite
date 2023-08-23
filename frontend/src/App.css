@@ -32,3 +32,14 @@ input,select{
   top: -9%;
   cursor: pointer;
 }
+
+.logo{
+  width: 80px;
+
+}
+
+.logo-img{
+  width: 100%;
+  object-fit: cover;
+  mix-blend-mode: color-burn;
+}
