@@ -53,10 +53,10 @@ const ProductCart = ({data}) => {
             <h5 className={`${styles.productDiscountPrice}`}>
               {data.price === 0
               ? data.price : data.discount_price}
-              $
+              ₹
             </h5>
             <h4 className={`${styles.price}`}>
-              {data.price ? data.price + "$" : null}
+              {data.price ? data.price + "₹" : null}
             </h4>
           </div>
           <span className='font-[400]  text-[17px] text-[#68d284'>

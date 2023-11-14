@@ -6,13 +6,14 @@ import {Link, useNavigate} from 'react-router-dom';
 import {server} from '../../server'
 import axios from 'axios';
 import {toast} from 'react-toastify'
+
 const Login = () => {
 
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [visible, setVisible] = useState(false);
-
+  const [rememberMe, setRememberMe] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -30,6 +31,7 @@ const Login = () => {
       .then((res) => {
         toast.success("Login Success!");
         navigate("/");
+        window.location.reload();
       })
       .catch((err) => {
         toast.error(err.response.data.message);
@@ -103,6 +105,8 @@ const Login = () => {
                 type="checkbox"
                 name="remember-me"
                 id="remember-me"
+                checked={rememberMe}
+                onChange={() => setRememberMe(!rememberMe)}
                 className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
               />
               <label
