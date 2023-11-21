@@ -2,13 +2,15 @@ import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import styles from '../../../styles/styles';
 import { AiFillHeart, AiFillStar, AiOutlineEye, AiOutlineHeart, AiOutlineShoppingCart, AiOutlineStar } from 'react-icons/ai';
-import ProductDetailsCard from "../ProductDetailsCart/ProductDetailsCart.jsx";
+import ProductDetailsCard from "../ProductDetailsCard/ProductDetailsCard.jsx";
 
-const ProductCart = ({data}) => {
+const ProductCard = ({data}) => {
   const [click,setClick] = useState(false);
   const [open,setOpen] = useState(false);
   const d = data.name;
   const product_name = d.replace(/\s+/g,"-");
+
+  
   return (
     <>
     <div className='w-full h-[370px] bg-white rounded-lg shadow-sm p-3 relative cursor-pointer'>
@@ -114,4 +116,4 @@ const ProductCart = ({data}) => {
   )
 }
 
-export default ProductCart
+export default ProductCard

@@ -4,7 +4,7 @@ import Header from '../components/Layout/Header'
 import styles from '../styles/styles'
 import { productData } from '../static/data'
 // import ProductCard from "../components/Route/ProductCard/ProductCard";
-import ProductCart from '../components/Route/ProductCard/ProductCart'
+import ProductCart from '../components/Route/ProductCard/ProductCard'
 
 const BestSellingPage = () => {
     

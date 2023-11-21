@@ -1,7 +1,7 @@
 import React from "react";
 import styles from "../../../../styles/styles";
 import { productData } from "../../../../static/data";
-import ProductCart from "../../../../components/Route/ProductCard/ProductCart";
+import ProductCart from "../../../../components/Route/ProductCard/ProductCard";
 
 const FeaturedProduct = () => {
   return (
