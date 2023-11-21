@@ -12,15 +12,10 @@ app.use(cors({
   }));
 app.use(express.json())
 app.use(cookieParser())
+
 // to upload our images and store in root directory file and to access folder image
 app.use('/', express.static("uploads"))
 app.use(bodyParser.urlencoded({extended: true, limit:'50mb'}))
-
-
-
-
-
-
 
 // config 
 if(process.env.NODE_ENV !== "PRODUCTION" ){
@@ -28,7 +23,6 @@ if(process.env.NODE_ENV !== "PRODUCTION" ){
         path:"backend/config/.env"
     })
 }
-
 
 // import routes
 const user = require('./controller/user');
@@ -38,8 +32,5 @@ app.use('/api/v2/user', user)
 
 app.use(ErrorHandler)
 
-
 // export our app and receive in from our server
 module.exports = app;
-
-

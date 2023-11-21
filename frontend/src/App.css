@@ -49,5 +49,17 @@ input,select{
 .logo-img{
   width: 100%;
   object-fit: cover;
-  mix-blend-mode: color-burn;
+  mix-blend-mode: color-burn !important;
+}
+
+
+
+
+@media (max-width: 600px){
+  .banner-mb{
+    width: 100% !important;
+    /* object-fit: contain !important;
+    object-fit: fill !important; */
+    object-fit: cover !important;
+  }
 }

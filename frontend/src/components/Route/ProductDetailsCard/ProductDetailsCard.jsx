@@ -8,7 +8,7 @@ import {
   AiOutlineShoppingCart,
 } from "react-icons/ai";
 
-const ProductDetailsCart = ({ setOpen, data }) => {
+const ProductDetailsCard = ({ setOpen, data }) => {
   const [count, setCount] = useState(1);
   const [click, setClick] = useState(false);
   // const [select, setSelect] = useState(false);
@@ -129,4 +129,4 @@ const ProductDetailsCart = ({ setOpen, data }) => {
   );
 };
 
-export default ProductDetailsCart;
+export default ProductDetailsCard;
