@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import styles from '../../../styles/styles';
 import { productData } from '../../../static/data';
-import ProductCard from "../ProductCard/ProductCart";
+import ProductCard from "../ProductCard/ProductCard";
 
 const BestDeals = () => {
   const [data,setData] = useState([]);

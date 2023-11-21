@@ -19,8 +19,6 @@ if (process.env.NODE_ENV !== "PRODUCTION") {
 connectDatabase();
 
 
-
-
 // create server
 const server = app.listen(process.env.PORT, () => {
   console.log(
