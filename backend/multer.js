@@ -10,7 +10,11 @@ const storage = multer.diskStorage({
         cb(null,filename + "-" + uniqueSuffix + ".png");
     },
 })
+
 exports.upload = multer({storage: storage})
+
+
+
 
 
 

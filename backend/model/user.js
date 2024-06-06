@@ -14,12 +14,14 @@ const userSchema = new mongoose.Schema({
   password:{
     type: String,
     required: [true, "Please enter your password"],
-    minLength: [4, "Password should be greater than 4 characters"],
+    minLength: [5, "Password should be greater than 5 characters"],
     select: false,
   },
   phoneNumber:{
     type: Number,
   },
+
+
   addresses:[
     {
       country: {
@@ -42,20 +44,28 @@ const userSchema = new mongoose.Schema({
       },
     }
   ],
+
   role:{
     type: String,
     default: "user",
   },
-  avatar:{
-    public_id: {
-      type: String,
-      required: false,
-    },
-    url: {
-      type: String,
-      required: false,
-    },
- },
+
+//   avatar:{
+//     public_id: {
+//       type: String,
+//       required: false,
+//     },
+//     url: {
+//       type: String,
+//       required: false,
+//     },
+//  },
+
+avatar: {
+  type: String,
+  required: true,
+},
+
  createdAt:{
   type: Date,
   default: Date.now(),

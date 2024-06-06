@@ -28,23 +28,34 @@ router.post("/create-user", upload.single("file"), async (req, res, next) => {
           console.log(err);
           res.status(500).json({ message: "Error deleting file" });
         }
-        return next(new ErrorHandler("User already exists", 400));
       });
+      return next(new ErrorHandler("User already exists", 400));
     }
 
-    let fileUrl = "";
-    if (req.file) {
-      // If a file is uploaded, set the fileUrl
-      const filename = req.file.filename;
-      fileUrl = path.join("uploads", filename);
-    }
+    const filename = req.file.filename;
+    const fileUrl = path.join(filename);
+
+    // const fileUrl = req.file? `uploads/${req.file.filename}` : "";
+    // let fileUrl = "";
+    // if (req.file) {
+
+    //   const filename = req.file.filename;
+    //   fileUrl = path.join("uploads", filename);
+    // }
 
     const user = {
-      name,
-      email,
-      password,
+      name: name,
+      email: email,
+      password: password,
       avatar: fileUrl,
     };
+
+    // const user = {
+    //   name: req.body.name,
+    //   email: email,
+    //   password: req.body.password,
+    //   avatar: fileUrl,
+    // }
 
     // Generate activation token and URL
     const activationToken = createActivationToken(user);
@@ -172,22 +183,212 @@ router.get(
   })
 );
 
-
 // logout user
 
-router.get("/logout", isAuthenticated ,catchAsyncError(async(req,res,next) => {
-  try{
-    res.cookie("token", null, {
-      expires: new Date(Date.now()),
-      httpOnly: true,
+router.get(
+  "/logout",
+  catchAsyncError(async (req, res, next) => {
+    try {
+      res.cookie("token", null, {
+        expires: new Date(Date.now()),
+        httpOnly: true,
+      });
+
+      res.status(201).json({
+        success: true,
+        message: "Log out successful!",
+      });
+    } catch (error) {
+      return next(new ErrorHandler(error.message, 500));
+    }
+  })
+);
+
+// update user info
+
+router.put(
+  "/update-user-info",
+  isAuthenticated,
+  catchAsyncError(async (req, res, next) => {
+    try {
+      const {  name, email, phoneNumber, password } = req.body;
+      const user = await User.findOne({ email }).select("+password");
+
+      if (!user) {
+        return next(new ErrorHandler("User not found", 400));
+      }
+
+      const isPasswordValid = await user.comparePassword(password);
+      if (isPasswordValid) {
+        return next(
+          new ErrorHandler("Please provide the correct information", 400)
+        );
+      }
+
+      user.name = name;
+      user.email = email;
+      user.phoneNumber = phoneNumber;
+
+      await user.save();
+
+      res.status(201).json({
+        success: true,
+        user,
+      });
+    } catch (error) {
+      return next(new ErrorHandler(error.message, 500));
+    }
+  })
+);
+
+// update user avatar
+
+router.put(
+  "/update-avatar",
+  isAuthenticated,
+  upload.single("image"),
+  catchAsyncError(async (req, res, next) => {
+    try {
+      const existsUser = await User.findById(req.user.id);
+
+      const existAvatarPath = `uploads/${existsUser.avatar}`;
+
+      fs.unlinkSync(existAvatarPath);
+
+      const fileUrl = path.join(req.file.filename);
+
+      const user = await User.findByIdAndUpdate(req.user.id, {
+        avatar: fileUrl,
+      });
+
+      res.status(200).json({
+        success: true,
+        user,
+      });
+    } catch (error) {
+      return next(new ErrorHandler(error.message, 500));
+    }
+  })
+);
+
+// update user addresses
+router.put(
+  "/update-user-addresses",
+  isAuthenticated,
+  catchAsyncError(async (req, res, next) => {
+    try {
+      const user = await User.findById(req.user.id);
+
+      const sameTypeAddress = user.addresses.find(
+        (addresses) => addresses.addressType === req.body.addressType
+      );
+      if (sameTypeAddress) {
+        return next(
+          new ErrorHandler(`${req.body.addressType} addresses already exists`)
+        );
+      }
+
+      const existAddress = user.addresses.find(
+        (address) => address._id === req.body._id
+      );
+
+      if (existAddress) {
+        Object.assign(existAddress, req.body);
+      } else {
+        // add the new address to the array
+        user.addresses.push(req.body);
+      }
+
+      await user.save();
+
+      res.status(200).json({
+        success: true,
+        user,
+      });
+    } catch (error) {
+      return next(new ErrorHandler(error.message, 500));
+    }
+  })
+);
+
+// delete user address
+
+router.delete(
+  "/delete-user-address/:id",
+
+  isAuthenticated,
+  catchAsyncError(
+  async (req, res, next) => {
+    try {
+      const userId = req.user._id;
+      const addressId = req.params.id;
+
+      await User.updateOne(
+        {
+          _id: userId,
+        },
+        { $pull: { addresses: { _id: addressId } } }
+      );
+
+      const user = await User.findById(userId);
+
+      res.status(200).json({success: true, user})
+      
+    } catch (error) {
+      return next(new ErrorHandler(error.message, 500));
+    }
+  }
+));
+
+
+// update user password
+
+router.put('/update-user-password', isAuthenticated, catchAsyncError(async(req, res, next) => {
+  try {
+    const user = await User.findById(req.user.id).select("+password");
+
+    const isPasswordMatched = await user.comparePassword(req.body.oldPassword)
+
+    if(!isPasswordMatched){
+      return(next(new ErrorHandler("Old password is incorrect!", 400)))
+
+
+    }
+
+    if(req.body.newPassword !== req.body.confirmPassword){
+      return(next(new ErrorHandler("Password does not matched with each other!", 400)))
+    }
+
+    user.password = req.body.newPassword
+
+    await user.save()
+
+    res.status(200).json({
+      success: true,
+      message: "Password updated successfully!"
     })
+
+
+  } catch (error) {
+    return next(new ErrorHandler(error.message, 500));
+  }
+}))
+
+
+
+// find user info with the user id
+
+router.get("/user-info/:id" , catchAsyncError(async(req, res, next) => {
+  try {
+
+    const user = await User.findById(req.params.id)
 
     res.status(201).json({
       success: true,
-      message: "Log out successful!"
+      user,
     })
-  
-  }catch(error){
+    
+  } catch (error) {
     return next(new ErrorHandler(error.message, 500));
   }
 }))

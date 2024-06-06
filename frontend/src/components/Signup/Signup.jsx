@@ -14,23 +14,35 @@ const Singup = () => {
   const [visible, setVisible] = useState(false);
   const [avatar, setAvatar] = useState(null);
 
+
+
   const handleFileInputChange = (e) => {
-    const reader = new FileReader();
-
-    reader.onload = () => {
-      if (reader.readyState === 2) {
-        setAvatar(reader.result);
-      }
-    };
-
-    reader.readAsDataURL(e.target.files[0]);
+    const file = e.target.files[0];
+    setAvatar(file);
   };
+
+
+
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    
+    
+    const config = { headers: { "Content-Type": "multipart/form-data"}}
+
+    const newForm = new FormData;
+
+
+    newForm.append("name", name);
+    newForm.append("email", email);
+    newForm.append("password", password);
+    newForm.append("file", avatar);
+  
+
+
     axios
-      .post(`${server}/user/create-user`, { name, email, password, avatar })
+      .post(`${server}/user/create-user`, newForm , config )
       .then((res) => {
         toast.success(res.data.message);
         setName("");
@@ -45,6 +57,7 @@ const Singup = () => {
   };
 
 
+ 
   
 
   return (
@@ -139,7 +152,8 @@ const Singup = () => {
                 <span className="inline-block h-8 w-8 rounded-full overflow-hidden">
                   {avatar ? (
                     <img
-                      src={avatar}
+                    src={URL.createObjectURL(avatar)}
+                      // src={avatar}
                       alt="avatar"
                       className="h-full w-full object-cover rounded-full"
                     />
@@ -172,6 +186,7 @@ const Singup = () => {
                 Submit
               </button>
             </div>
+
             <div className={`${styles.noramlFlex} w-full`}>
               <h4>Already have an account?</h4>
               <Link to="/login" className="text-blue-600 pl-2">
@@ -186,3 +201,20 @@ const Singup = () => {
 };
 
 export default Singup;
+
+
+
+
+  // const handleFileInputChange = (e) => {
+  //   const reader = new FileReader();
+
+  //   reader.onload = () => {
+  //     if (reader.readyState === 2) {
+  //       setAvatar(reader.result);
+  //     }
+  //   };
+
+   
+
+  //   reader.readAsDataURL(e.target.files[0]);
+  // };

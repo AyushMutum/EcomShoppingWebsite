@@ -1,18 +1,50 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   AiFillHeart,
   AiOutlineHeart,
   AiOutlineMessage,
   AiOutlineShoppingCart,
 } from "react-icons/ai";
-import { Link, useNavigate } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
+import { Link, useNavigate, useParams } from "react-router-dom";
+import { toast } from "react-toastify";
+import { addToCart } from "../../redux/actions/cart";
+// import product from "../../../../backend/model/product";
+import { getAllProductsShop } from "../../redux/actions/product";
+import { addToWishlist, removeFromWishlist } from "../../redux/actions/wishlist";
+import { backend_url, server } from "../../server";
 import styles from "../../styles/styles";
-
+import Ratings from "./Ratings";
+import axios from "axios";
 const ProductDetails = ({ data }) => {
+
+  const {wishlist} = useSelector((state) => state.wishlist)
+  const {cart} = useSelector((state) => state.cart)
+  const {user, isAuthenticated} = useSelector((state) => state.user)
+  const { products } = useSelector((state) => state.products)
   const [count, setCount] = useState(1);
   const [click, setClick] = useState(false);
   const [select, setSelect] = useState(0);
   const navigate = useNavigate();
+  const dispatch = useDispatch();
+
+
+  useEffect(() => {
+    dispatch(getAllProductsShop(data && data?.shop._id))
+    if(wishlist && wishlist.find((i) => i._id === data?._id)){
+      setClick(true);
+    } else {
+      setClick(false)
+    }
+  }, [data, wishlist])
+
+  // console.log(data)
+  // console.log("Hello Ayush")
+ 
+  // const {id} = useParams;
+
+
+
 
   const incrementCount = () => {
     setCount(count + 1);
@@ -24,8 +56,62 @@ const ProductDetails = ({ data }) => {
     }
   };
 
-  const handleMessageSubmit = () => {
-    navigate("/inbox?conversation=507ebjwaerfa");
+
+  const removeFromWishlistHandler = (data) => {
+    setClick(!click);
+    dispatch(removeFromWishlist(data))
+  }
+
+
+  const addToWishlistHandler = (data) => {
+    setClick(!click);
+    dispatch(addToWishlist(data))
+  }
+
+
+  const addToCartHandler = (id) => {
+    const isItemExists = cart && cart.find((i) => i._id === id);
+    if(isItemExists){
+      toast.error("Item already in cart!")
+    } else {
+      if(data.stock < 1){
+        toast.error("Product stock limited")
+      }
+      else {
+        const cartData = {...data,qty: count}
+        dispatch(addToCart(cartData));
+        toast.success("Item added to cart successfully!")
+      }
+    }
+  }
+
+
+  const totalReviewsLength = products && products.reduce((acc,product) => acc + product.reviews.length, 0) 
+
+  const totalRatings = products && products.reduce((acc, product) => acc + product.reviews.reduce((sum, review) => sum + review.rating, 0), 0)
+
+  const averageRating = totalRatings / totalReviewsLength || 0
+
+  const handleMessageSubmit = async () => {
+    if (isAuthenticated) {
+      const groupTitle = data._id + user._id;
+      const userId = user._id;
+      const sellerId = data.shop._id;
+      await axios
+        .post(`${server}/conversation/create-new-conversation`, {
+          groupTitle,
+          userId,
+          sellerId,
+        })
+        .then((res) => {
+          navigate(`/inbox?${res.data.conversation._id}`);
+        })
+        .catch((error) => {
+          toast.error(error.response.data.message);
+        });
+    } else {
+      toast.error("Please login to create a conversation");
+    }
   };
 
   return (
@@ -35,35 +121,36 @@ const ProductDetails = ({ data }) => {
           <div className="w-full py-5">
             <div className="block w-full 800px:flex">
               <div className="w-full 800px:[50%]">
+                {/* <img src={data.images_Url[select].url} */}
                 <img
-                  src={data.image_Url[select].url}
+                  src={`${backend_url}${data && data.images[select]}`}
                   alt=""
                   className="w-[80%]"
                 />
-                <div className="w-full flex">
-                  <div
-                    className={`${
-                      select === 0 ? "border" : "null"
-                    } cursor-pointer`}
-                  >
-                    <img
-                      src={data?.image_Url[0].url}
+
+                <div className="w-full flex ">
+                {
+                  data && data.images.map((i, index) => (
+                    <div 
+                    className={`${select === 0 ? "border" : "null"}
+                    cursor-pointer `} >
+                      <img
+                      // src={`${backend_url}${data.images && data.images[0]}`}
+                      src={`${backend_url}${i}`}
                       alt=""
-                      className="h-[150px]"
-                      onClick={() => setSelect(0)}
+                      className="h-[200px] overflow-hidden mr-3 mt-3 "
+                      onClick={() => setSelect(index)}
                     />
-                  </div>
+                  
+                    </div>
+                  ))
+                }
+
                   <div
                     className={`${
                       select === 1 ? "border" : "null"
                     } cursor-pointer`}
                   >
-                    <img
-                      src={data?.image_Url[1].url}
-                      alt=""
-                      className="h-[150px]"
-                      onClick={() => setSelect(1)}
-                    />
                   </div>
                 </div>
               </div>
@@ -72,10 +159,10 @@ const ProductDetails = ({ data }) => {
                 <p>{data.description}</p>
                 <div className="flex pt-3">
                   <h4 className={`${styles.productDiscountPrice}`}>
-                    ₹{data.discount_price}
+                    ₹{data.discountPrice}
                   </h4>
                   <h3 className={`${styles.price}`}>
-                    {data.price ? data.price + "₹" : null}
+                    {data.originalPrice ? data.originalPrice + "₹" : null}
                   </h3>
                 </div>
 
@@ -102,7 +189,7 @@ const ProductDetails = ({ data }) => {
                       <AiFillHeart
                         size={30}
                         className="cursor-pointer"
-                        onClick={() => setClick(!click)}
+                        onClick={() => removeFromWishlistHandler(data)}
                         color={click ? "red" : "#333"}
                         title="Remove from wishlist"
                       />
@@ -110,7 +197,7 @@ const ProductDetails = ({ data }) => {
                       <AiOutlineHeart
                         size={30}
                         className="cursor-pointer"
-                        onClick={() => setClick(!click)}
+                        onClick={() => addToWishlistHandler(data)}
                         color={click ? "red" : "#333"}
                         title="Add to wishlist"
                       />
@@ -119,24 +206,33 @@ const ProductDetails = ({ data }) => {
                 </div>
                 <div
                   className={`${styles.button} !mt-6 !rounded !h-11 flex items-center`}
+                  onClick={() => addToCartHandler(data._id)}
                 >
                   <span className="text-white flex items-center">
                     Add to cart <AiOutlineShoppingCart className="ml-1" />
                   </span>
                 </div>
+
                 <div className="flex items-center pt-8 ">
+                  
+                <Link to={`/shop/preview/${data?.shop._id}`}>
                   <img
-                    src={data.shop.shop_avatar.url}
+                    // src={data.shop.shop_avatar.url}
+                    src={`${backend_url}${data?.shop?.avatar}`}
                     alt=""
                     className="w-[50px] h-[50px] rounded-full mr-2"
                   />
+                   </Link>
+
                   <div className="pr-8">
+                  <Link to={`/shop/preview/${data?.shop._id}`}>
                     <h3 className={`${styles.shop_name} pb-1 pt-1`}>
                       {data.shop.name}
                     </h3>
-
+                    </Link>
+                    
                     <h5 className="pb-3 text-[15px]">
-                      ({data.shop.ratings}) Ratings
+                      ({averageRating}/5) Ratings
                     </h5>
                   </div>
                   <div
@@ -151,7 +247,10 @@ const ProductDetails = ({ data }) => {
               </div>
             </div>
           </div>
-          <ProductDetailsInfo data={data} />
+          <ProductDetailsInfo data={data} 
+           products={products}
+           totalReviewsLength = {totalReviewsLength}
+           averageRating={averageRating} />
           <br />
           <br />
         </div>
@@ -160,7 +259,7 @@ const ProductDetails = ({ data }) => {
   );
 };
 
-const ProductDetailsInfo = ({data}) => {
+const ProductDetailsInfo = ({data, products, totalReviewsLength, averageRating}) => {
   const [active, setActive] = useState(1);
 
   return (
@@ -196,6 +295,7 @@ const ProductDetailsInfo = ({data}) => {
           ) : null}
         </div>
         <div className="relative">
+          
           <h5
             className={
               "text-[#000] text-[18px] px-1 leading-5 font-[600] cursor-pointer 800px:text-[20px]"
@@ -213,25 +313,35 @@ const ProductDetailsInfo = ({data}) => {
       {active === 1 ? (
         <>
           <p className="py-2 text-[18px] leading-8 pb-10 whitespace-pre-line">
-            Embark on a journey into the future with the iPhone 15, a marvel of
-            technological sophistication that seamlessly blends stunning
-            aesthetics with groundbreaking functionality. Designed to exceed the
-            expectations of even the most discerning users, the iPhone 15
-            represents the pinnacle of Apple's commitment to innovation,
-            connectivity, and user experience.
-          </p>
-          <p className="py-2 text-[18px] leading-8 pb-10 whitespace-pre-line">
-            Lorem ipsum, dolor sit amet consectetur adipisicing elit. Expedita voluptatibus consectetur similique a enim distinctio sapiente, repellat voluptate in amet consequuntur impedit porro nihil odit sint adipisci perspiciatis voluptas molestias ab? Quisquam magni voluptates a vero autem ullam sapiente voluptate, ad quibusdam ipsa beatae maiores vel totam atque exercitationem. Ex molestias fugiat deserunt praesentium sint amet tenetur, hic, necessitatibus ratione, eveniet ipsam sit! Dolore aliquam, perspiciatis magnam officiis aspernatur harum exercitationem! Illum dolore voluptatum facilis, molestias aliquid eos assumenda suscipit deserunt et. Optio, quisquam natus distinctio magnam molestias odio illo neque, recusandae, modi vero sint error veniam tenetur totam esse!
-          </p>
-          <p className="py-2 text-[18px] leading-8 pb-10 whitespace-pre-line">
-            Lorem ipsum, dolor sit amet consectetur adipisicing elit. Expedita voluptatibus consectetur similique a enim distinctio sapiente, repellat voluptate in amet consequuntur impedit porro nihil odit sint adipisci perspiciatis voluptas molestias ab? Quisquam magni voluptates a vero autem ullam sapiente voluptate, ad quibusdam ipsa beatae maiores vel totam atque exercitationem. Ex molestias fugiat deserunt praesentium sint amet tenetur, hic, necessitatibus ratione, eveniet ipsam sit! Dolore aliquam, perspiciatis magnam officiis aspernatur harum exercitationem! Illum dolore voluptatum facilis, molestias aliquid eos assumenda suscipit deserunt et. Optio, quisquam natus distinctio magnam molestias odio illo neque, recusandae, modi vero sint error veniam tenetur totam esse!
+            {data.description}
           </p>
         </>
       ) : null}
 
       {active === 2 ? (
-        <div className="w-full justify-center min-h-[40vh] flex items-center">
-          <p>No Reviews yet!</p>
+        <div className="w-full py-3 overflow-y-scroll  min-h-[40vh] flex flex-col items-center">
+          {
+            data && data.reviews.map((item, index) => (
+              <div className="w-full flex my-2">
+                <img src={`${backend_url}/${item.user.avatar}` } className="w-[50px] h-[50px] rounded-full" alt=" " />  
+                  <div className="pl-2">
+                   <div className="w-full flex items-center ">
+                   <h1 className=" font-[500] mr-3">{item.user.name}</h1>
+                    <Ratings rating={data?.ratings} />
+                   </div>
+                    <p>{item.comment}</p>
+                  </div>
+                </div>
+            ))
+          }
+
+        <div className="w-full flex justify-center">
+        {
+            data && data.reviews.length === 0 && (
+              <h5>No reviews for this product!</h5>
+            )
+          }
+        </div>
         </div>
       ) : null }
 
@@ -239,33 +349,41 @@ const ProductDetailsInfo = ({data}) => {
         active === 3 && (
           <div className="w-full block 800px:flex p-5">
             <div className="w-full 800px:w-[50%]">
-              <div className="flex items-center">
-                <img src={data.shop.shop_avatar.url} alt=""
-                 className="w-[50px] h-[50px] rounded-full" />
+             <Link to={`/shop/preview/${data.shop._id}`}>
+             <div className="flex items-center">
+               
+                <img src={`${backend_url}${data?.shop?.avatar}`}
+                 className="w-[50px] h-[50px] rounded-full" 
+                 alt=""
+                 />
+                
+
                  <div className="pl-3">
                   <h3 className={`${styles.shop_name}`}>{data.shop.name}</h3>
-                  <h5 className="pb-2 text-[15px]">({data.shop.ratings})Ratings</h5>
+                  <h5 className="pb-2 text-[15px]"> {averageRating}/5 Ratings</h5>
+
                   
                  </div>
                 
               </div>
+             </Link>
               <p className="pt-2">
-                  Lorem ipsum, dolor sit amet consectetur adipisicing elit. Sit ea natus obcaecati ipsum repellat tenetur sint qui veritatis, a ex deleniti hic suscipit soluta nihil pariatur veniam repellendus dolorem est iure commodi atque! Modi esse, dolorum dolorem ut atque sint.
+                 {data.shop.description}
                  </p>
             </div>
             <div className="w-full 800px:[50%] mt-5 800px:mt-0 800px:flex flex-col items-end">
                 <div className="text-left">
                   <h5 className="font-[600]">
-                    Joined on: <span className="font-[500]">26 March, 2022</span>
+                    Joined on: <span className="font-[500]">{data.shop?.createdAt?.slice(0,10)}</span>
                   </h5>
                   <h5 className="font-[500] pt-3">
-                    Total Products: <span className="font-[500]" >899</span>
+                    Total Products: <span className="font-[500]" >{products && products.length}</span>
                   </h5>
                   <h5 className="font-[500] pt-3">
-                    Total Reviews: <span className="font-[500]" >276</span>
+                    Total Reviews: <span className="font-[500]" >{totalReviewsLength}</span>
                   </h5>
 
-                  <Link to="/">
+                  <Link to={`/shop/preview/${data?.shop._id}`}>
                 <div
                   className={`${styles.button} !rounded-[4px] !h-[39.5px] mt-3`}
                 >
