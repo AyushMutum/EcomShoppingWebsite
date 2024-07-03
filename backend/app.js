@@ -7,7 +7,7 @@ const bodyParser = require('body-parser')
 const cors = require("cors"); 
 
 app.use(cors({
-    origin: "http://localhost:3000",
+    origin: "https://ecom-shopping-website-uwx1-52a6c90hw-ayushmutums-projects.vercel.app/",
     credentials: true, 
   }));
   
