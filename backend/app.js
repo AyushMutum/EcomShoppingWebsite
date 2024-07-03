@@ -5,6 +5,8 @@ const app = express();
 const cookieParser = require('cookie-parser')
 const bodyParser = require('body-parser')
 const cors = require("cors"); 
+const path = require("path")
+
 
 app.use(cors({
     origin: "https://ecom-shopping-website-uwx1-52a6c90hw-ayushmutums-projects.vercel.app/",
@@ -15,9 +17,9 @@ app.use(express.json())
 app.use(cookieParser())
 
 // to upload our images and store in root directory file and to access folder image
-app.use('/', express.static("uploads"))
+app.use('/', express.static(path.join(__dirname,"./uploads")))
 
-app.get('/', (req, res) => {
+app.get('/test', (req, res) => {
     res.send("Hello World!");
 });
 
