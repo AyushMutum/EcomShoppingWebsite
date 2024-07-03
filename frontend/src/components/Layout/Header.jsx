@@ -69,6 +69,7 @@ const Header = ({ activeHeading }) => {
             </Link>
           </div>
 
+
           {/* search box */}
           <div className="w-[50%] relative">
             <input
