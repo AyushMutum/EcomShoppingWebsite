@@ -1,5 +1,5 @@
 import { Button } from "@material-ui/core";
-import { DataGrid } from "@material-ui/data-grid";
+import { TextField } from "@material-ui/data-grid";
 import React, { useEffect, useState } from "react";
 import { AiOutlineDelete, AiOutlineEye } from "react-icons/ai";
 import { RxCross1 } from "react-icons/rx";
@@ -131,7 +131,7 @@ const AllCoupons = () => {
               <span className="text-white">Create Coupon code</span>
             </div>
           </div>
-          <DataGrid
+          <TextField
             rows={row}
             columns={columns}
             pageSize={10}

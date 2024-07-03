@@ -164,8 +164,10 @@
 
 
 
-import { Button } from "@material-ui/core";
-import { DataGrid } from "@material-ui/data-grid";
+// import { Button } from "@material-ui/core";
+// import { DataGrid } from "@material-ui/data-grid";
+import { Button, TextField } from '@mui/material';
+
 import React, { useEffect } from "react";
 import { AiOutlineDelete, AiOutlineEye } from "react-icons/ai";
 import { useDispatch, useSelector } from "react-redux";
@@ -275,7 +277,7 @@ const AllProducts = () => {
         <Loader />
       ) : (
         <div className="w-full mx-8 pt-1 mt-10 bg-white">
-          <DataGrid
+          <TextField
             rows={row}
             columns={columns}
             pageSize={10}
