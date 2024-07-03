@@ -1,5 +1,7 @@
-import { Button } from "@material-ui/core";
-import { TextField } from "@material-ui/data-grid";
+// import { Button } from "@material-ui/core";
+// import { TextField } from "@material-ui/data-grid";
+import { Button, TextField } from '@mui/material';
+
 import React, { useEffect, useState } from "react";
 import { AiOutlineDelete, AiOutlineEye } from "react-icons/ai";
 import { RxCross1 } from "react-icons/rx";
