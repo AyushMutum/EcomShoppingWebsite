@@ -1,6 +1,0 @@
-{
-  "dependencies": {
-    "@testing-library/react": "^16.0.0",
-    "legacy": "^0.0.3"
-  }
-}
