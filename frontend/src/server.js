@@ -1,6 +1,8 @@
 
 
 
-export const server = "http://localhost:8000/api/v2"
+export const server = "https://ecom-shopping-website-g358.vercel.app/api/v2"
 
-export const backend_url = 'http://localhost:8000/'
+export const backend_url = 'https://ecom-shopping-website-g358.vercel.app/'
+
+// 'http://localhost:8000/'
